@@ -6,9 +6,9 @@ services:
     container_name: postgres_ilabs
     restart: always
     environment:
-      POSTGRES_DB=labs_db
-      POSTGRES_USER=root
-      POSTGRES_PASSWORD=example
+      - POSTGRES_DB=labs_db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=example
     ports:
       - "5432:5432"
     volumes:
