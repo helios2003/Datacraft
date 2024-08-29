@@ -1,10 +1,10 @@
 "use client"
 
-import Navbar from "@/components/Navbar"
+import Navbar from "@/components/utils/Navbar"
 import { useDropzone } from "react-dropzone"
 import { useCallback, useState } from "react"
 import { PT_Serif_Caption } from "next/font/google"
-import Processbutton from "@/components/Processbutton"
+import Processbutton from "@/components/button/Processbutton"
 import { FaUpload } from "react-icons/fa6"
 
 const pt_serif = PT_Serif_Caption({
@@ -41,7 +41,7 @@ export default function Upload() {
       <div
         className={`flex flex-col items-center justify-center space-y-12 ${pt_serif.className}`}
       >
-        <Navbar />
+        <Navbar heading="Upload Section"/>
         <div className="mt-12 text-5xl font-extrabold text-purple-500">
           Upload Your Transaction Sheets Here
         </div>

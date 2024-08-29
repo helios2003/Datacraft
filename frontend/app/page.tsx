@@ -1,5 +1,5 @@
-import Navbar from "@/components/Navbar";
-import Uploadbutton from "@/components/Uploadbutton";
+import Navbar from "@/components/utils/Navbar";
+import Uploadbutton from "@/components/button/Uploadbutton";
 import Image from "next/image";
 import { PT_Serif_Caption } from "next/font/google";
 
@@ -12,15 +12,13 @@ const pt_serif = PT_Serif_Caption({
 export default async function Home() {
   
   return (
-    <>
-      <Navbar />
+    <div className={`${pt_serif.className}`}>
+      <Navbar heading="Datacraft"/>
       <div className="flex flex-col items-center justify-center text-center ">
         <div>
           <Image src="/home.png" height={400} width={400} alt="Home Page"/>
         </div>
-        <div
-          className={`${pt_serif.className}`}
-        >
+        <div>
           <h1 className="text-purple-500 text-5xl font-extrabold">
             Quick and Efficient Way to <br />
             Visualize Your Transactions
@@ -33,6 +31,6 @@ export default async function Home() {
         </div>
           <Uploadbutton />
       </div>
-    </>
+    </div>
   );
 }

@@ -60,7 +60,7 @@ def upload_files(files: List[UploadFile] = File(...)) -> dict:
         os.mkdir('merchant', exist_ok=True)
         os.mkdir('payment', exist_ok=True)
         
-        # all the other files in the direcotries are deleted to save these 2 files
+        # all the other files in the directories are deleted to save these 2 files
         delete_files_in_directory('merchant')
         delete_files_in_directory('payment')
         
@@ -113,8 +113,6 @@ def process_files():
         df_payment["Payment Type"] = df_payment["Payment Type"].str.replace("Service Fee", "Order")
         df_payment["Payment Type"] = df_payment["Payment Type"].str.replace("Refund", "Return")
         df_payment["Transaction Type"] = "Payment"
-        
-        
         
     except Exception as e:
         raise HTTPException(

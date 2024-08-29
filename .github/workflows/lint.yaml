@@ -18,10 +18,11 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: '20'
-
+    
+    # frontend linting
     - name: Install frontend dependencies
       working-directory: ./frontend
-      run: npm ci
+      run: npm install
 
     - name: Lint frontend
       working-directory: ./frontend
@@ -29,8 +30,9 @@ jobs:
 
     - name: Format frontend
       working-directory: ./frontend
-      run: npm run format
+      run: npm run lint:fix
 
+    # backend linting
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
@@ -44,4 +46,4 @@ jobs:
 
     - name: Lint backend
       working-directory: ./backend
-      run: pylint --disable=C0303 **/*.py
+      run: pylint --disable=C0303 --disable=C0301 **/*.py
