@@ -1,8 +1,7 @@
 import Navbar from "@/components/Navbar";
-import Button from "@/components/Button";
+import Uploadbutton from "@/components/Uploadbutton";
 import Image from "next/image";
 import { PT_Serif_Caption } from "next/font/google";
-import Link from "next/link";
 
 const pt_serif = PT_Serif_Caption({
   weight: "400",
@@ -10,13 +9,14 @@ const pt_serif = PT_Serif_Caption({
   display: "swap",
 });
 
-export default function Home() {
+export default async function Home() {
+  
   return (
     <>
       <Navbar />
-      <div className="flex flex-col items-center justify-center">
+      <div className="flex flex-col items-center justify-center text-center ">
         <div>
-          <Image src="/home.png" height={500} width={500} alt="Home Page" className="drop-shadow"/>
+          <Image src="/home.png" height={400} width={400} alt="Home Page"/>
         </div>
         <div
           className={`${pt_serif.className}`}
@@ -26,8 +26,12 @@ export default function Home() {
             Visualize Your Transactions
           </h1>
           <br />
+          <h2 className="text-purple-400 text-xl">
+              Upload your CSV and Excel transaction sheets here and let us do the heavylifting <br /> to provide you with meaningful stats
+          </h2>
+          <br />
         </div>
-          <Button />
+          <Uploadbutton />
       </div>
     </>
   );
