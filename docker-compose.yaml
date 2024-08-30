@@ -1,6 +1,19 @@
 version: '3.8'
 
 services:
+  frontend:
+    image: ilab-frontend
+    build:
+      context: ./frontend
+      target: dev
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+      
   postgres:
     image: postgres:14
     container_name: postgres_ilabs

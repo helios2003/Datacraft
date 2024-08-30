@@ -106,7 +106,10 @@ def process_files():
         
         # preprocessng for payment file
         df_payment = df_payment[df_payment["type"] != "Transfer"]
+        
         df_payment.rename(columns={"type": "Payment Type"}, inplace=True)
+        df_payment.rename(columns={"order id": "Order Id"}, inplace=True)
+
         df_payment["Payment Type"] = df_payment["Payment Type"].str.replace("Adjustment", "Order")
         df_payment["Payment Type"] = df_payment["Payment Type"].str.replace("FBA Inventory Fee", "Order")
         df_payment["Payment Type"] = df_payment["Payment Type"].str.replace("Fulfilment Fee Refund", "Order")
@@ -114,13 +117,23 @@ def process_files():
         df_payment["Payment Type"] = df_payment["Payment Type"].str.replace("Refund", "Return")
         df_payment["Transaction Type"] = "Payment"
         
+        # Merging the 2 dataframes
+        df_merged_cols = ['Order Id', 'Transaction Type', 'Payment Type', 'Invoice Amount', 'total', 
+                          'description', 'Order Date', 'date/time']
+        
+        df_merged_merchant = pd.DataFrame(columns=df_merged_cols)
+        df_merged_payment = pd.DataFrame(columns=df_merged_cols)
+        
+        df_merged = pd.concat([df_merged_merchant, df_merged_payment], ignore_index=True)
+        
+        return {"msg": "Your dataframes have been successfully processed"}
+        
     except Exception as e:
         raise HTTPException(
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail = "An error occured"
         ) from e
         
-
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)
