@@ -3,6 +3,7 @@ This module contains the API definitions for file uploads and processing.
 """
 
 import os
+import glob
 import shutil
 from typing import List
 from uuid import uuid4
@@ -10,6 +11,7 @@ import pandas as pd
 from fastapi import FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from helper.functions import delete_files_in_directory
+from db.init import engine
 
 app = FastAPI()
 
@@ -57,8 +59,8 @@ def upload_files(files: List[UploadFile] = File(...)) -> dict:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid file type"
             ) 
-        os.mkdir('merchant', exist_ok=True)
-        os.mkdir('payment', exist_ok=True)
+        os.makedirs('merchant', exist_ok=True)
+        os.makedirs('payment', exist_ok=True)
         
         # all the other files in the directories are deleted to save these 2 files
         delete_files_in_directory('merchant')
@@ -91,8 +93,8 @@ def process_files():
         500: Internal Server Error
     """
     try:
-        merchant_file_path = os.listdir('merchants')[0]
-        payment_file_path = os.listdir('payments')[0]
+        merchant_file_path = glob.glob(os.path.join('merchant', '*'))[0]
+        payment_file_path = glob.glob(os.path.join('payment', '*'))[0]
         
         df_merchant = pd.DataFrame(pd.read_excel(merchant_file_path))
         df_payment = pd.read_csv(payment_file_path)
@@ -125,10 +127,22 @@ def process_files():
         df_merged_payment = pd.DataFrame(columns=df_merged_cols)
         
         df_merged = pd.concat([df_merged_merchant, df_merged_payment], ignore_index=True)
-        
+        df_mapped = df_merged.rename(columns={
+                    'Order Id': 'order_id',
+                    'Transaction Type': 'transaction_type',
+                    'Payment Type': 'payment_type',
+                    'Invoice Amount': 'invoice_amount',
+                    'total': 'total',
+                    'description': 'description',
+                    'Order Date': 'order_date',
+                    'date/Time': 'date_time'
+                }) 
+         
+        df_mapped.to_sql('MergedSheet', engine)
         return {"msg": "Your dataframes have been successfully processed"}
         
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail = "An error occured"
