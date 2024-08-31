@@ -1,15 +1,15 @@
-"use client";
+"use client"
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState } from "react"
 
 interface ProcessbuttonProps {
-  filesSize: number;
+  filesSize: number
+  onClick: () => void
+  uploadStatus: boolean
 }
 
-export default function Processbutton({ filesSize }: ProcessbuttonProps) {
-  const [hover, setHover] = useState<boolean>(false);
-  const router = useRouter();
+export default function Processbutton({ filesSize, onClick, uploadStatus }: ProcessbuttonProps) {
+  const [hover, setHover] = useState<boolean>(false)
 
   const isDisabled = filesSize !== 2;
 
@@ -17,7 +17,7 @@ export default function Processbutton({ filesSize }: ProcessbuttonProps) {
     <div className="p-16">
       <button
         className={`
-          bg-purple-500 h-12 w-full mt-6 rounded-md
+          bg-purple-500 h-12 w-full mt-6 rounded-md text-xl
           ${hover && !isDisabled ? 'bg-purple-700' : ''} 
           text-white 
           ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-purple-700'}
@@ -25,11 +25,9 @@ export default function Processbutton({ filesSize }: ProcessbuttonProps) {
         disabled={isDisabled}
         onMouseEnter={() => setHover(true)}
         onMouseLeave={() => setHover(false)}
-        onClick={() => {
-          
-        }}
+        onClick={onClick}
       >
-        Start Processing
+        {uploadStatus ? "Start Processing" : "Start Uploading"}
       </button>
     </div>
   );

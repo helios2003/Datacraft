@@ -8,13 +8,16 @@ import shutil
 from typing import List
 from uuid import uuid4
 import pandas as pd
-from fastapi import FastAPI, File, UploadFile, HTTPException, status
+from fastapi import FastAPI, File, UploadFile, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
-from helper.functions import delete_files_in_directory
-from db.init import engine
+from sqlalchemy.future import select
+from helper.functions import delete_files_in_directory, copy_cols_data
+from db.init import engine, Session
+from db.models import MergedSheet
+
+session = Session()
 
 app = FastAPI()
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -99,7 +102,7 @@ def process_files():
         df_merchant = pd.DataFrame(pd.read_excel(merchant_file_path))
         df_payment = pd.read_csv(payment_file_path)
         
-        # preprocessing for merchant file
+        # preprocessing for merchant file        
         df_merchant = df_merchant[df_merchant["Transaction Type"] != "Cancel"]
         df_merchant['Transaction Type'] = df_merchant['Transaction Type'].str.replace('Refund', 
                                                                                       'Return')
@@ -126,19 +129,26 @@ def process_files():
         df_merged_merchant = pd.DataFrame(columns=df_merged_cols)
         df_merged_payment = pd.DataFrame(columns=df_merged_cols)
         
+        for col in df_merged_cols:
+            copy_cols_data(df_merchant, df_merged_merchant, col)
+            copy_cols_data(df_payment, df_merged_payment, col)
+        
         df_merged = pd.concat([df_merged_merchant, df_merged_payment], ignore_index=True)
         df_mapped = df_merged.rename(columns={
                     'Order Id': 'order_id',
                     'Transaction Type': 'transaction_type',
                     'Payment Type': 'payment_type',
-                    'Invoice Amount': 'invoice_amount',
+                    'Invoice Amount': 'invoice_amt',
                     'total': 'total',
                     'description': 'description',
                     'Order Date': 'order_date',
-                    'date/Time': 'date_time'
+                    'date/time': 'date_time'
                 }) 
-         
-        df_mapped.to_sql('MergedSheet', engine)
+        df_mapped['id'] = range(1, len(df_mapped) + 1)
+        df_mapped['total'] = df_mapped['total'].str.replace(',', '').astype(float)
+        
+        df_mapped.to_sql('MergedSheet', engine, if_exists='replace')
+
         return {"msg": "Your dataframes have been successfully processed"}
         
     except Exception as e:
@@ -148,6 +158,38 @@ def process_files():
             detail = "An error occured"
         ) from e
         
+@app.get('/generate-tables')
+def generate_tables():
+    try:
+        statement = session.query(MergedSheet).all()
+        df = pd.DataFrame([row.__dict__ for row in statement])
+        
+        if '_sa_instance_state' in df.columns:
+            df = df.drop(columns=['_sa_instance_state'])
+            
+        df_filtered = df.dropna(subset=['order_id'])
+        
+        df_summary = df.groupby(['description']).agg({
+            'total': 'sum'
+        })
+        
+        df_grouped = df_filtered.groupby(['order_id', 'transaction_type']).agg({
+            'invoice_amt': 'sum',
+            'total': 'sum'
+        }).reset_index()
+        
+        df_summary['id'] = range(1, len(df_summary) + 1)
+        df_summary.to_sql('SummarySheet', engine, if_exists='replace')
+        return {"msg": "Table generated, filtered, and grouped successfully"}
+    
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while generating tables"
+        ) from e
+        
+      
 if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=8000)

@@ -19,3 +19,9 @@ def delete_files_in_directory(directory_path: str) -> None:
                 os.remove(file_path)
     except OSError:
         print("Error occurred while deleting files.")
+
+def copy_cols_data(df_source, df_target, col):
+  if col in df_source.columns:
+    df_target[col] = df_source[col]
+    return True
+  return False

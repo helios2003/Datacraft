@@ -1,5 +1,5 @@
 import Navbar from "@/components/utils/Navbar";
-import Uploadbutton from "@/components/button/Uploadbutton";
+import Nextbutton from "@/components/button/Nextbutton";
 import Image from "next/image";
 import { PT_Serif_Caption } from "next/font/google";
 
@@ -29,7 +29,7 @@ export default async function Home() {
           </h2>
           <br />
         </div>
-          <Uploadbutton />
+          <Nextbutton />
       </div>
     </div>
   );
