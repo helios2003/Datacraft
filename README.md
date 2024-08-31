@@ -11,5 +11,6 @@ git clone https://github.com/helios2003/Datacraft.git
 ## Tech Stack
 - FastAPI in the backend + Pandas for the data preprocessing.
 - NextJS in the frontend.
+- PostgreSQL as the database.
   
   

@@ -9,7 +9,7 @@ const override: CSSProperties = {
   borderColor: "purple",
 }
 
-function App() {
+export default function Loading() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen">
       <RingLoader
@@ -19,9 +19,7 @@ function App() {
         aria-label="Loading Spinner"
         data-testid="loader"
       />
-      <p className="mt-4 text-xl text-purple-600">The page is loading</p>
+      <p className="mt-4 text-xl text-purple-600">The data is loading</p>
     </div>
   );
 }
-
-export default App;

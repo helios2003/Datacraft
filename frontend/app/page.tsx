@@ -1,7 +1,7 @@
-import Navbar from "@/components/utils/Navbar";
-import Nextbutton from "@/components/button/Nextbutton";
-import Image from "next/image";
-import { PT_Serif_Caption } from "next/font/google";
+import Navbar from "@/components/utils/Navbar"
+import Nextbutton from "@/components/buttons/Nextbutton"
+import Image from "next/image"
+import { PT_Serif_Caption } from "next/font/google"
 
 const pt_serif = PT_Serif_Caption({
   weight: "400",

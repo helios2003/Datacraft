@@ -1,0 +1,10 @@
+- implement the tables
+- implement the charts
+- handle the prcessng button loader
+- clean up the routes
+- use pydantic
+- fix the deployment with docker
+- pylint
+- eslint
+- push down prop drilling
+- logging

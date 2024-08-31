@@ -4,7 +4,7 @@ import Navbar from "@/components/utils/Navbar"
 import { useDropzone } from "react-dropzone"
 import { useCallback, useState } from "react"
 import { PT_Serif_Caption } from "next/font/google"
-import Processbutton from "@/components/button/Processbutton"
+import Processbutton from "@/components/buttons/Processbutton"
 import { FaUpload } from "react-icons/fa6"
 import axios from "axios"
 
