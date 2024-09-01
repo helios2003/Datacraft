@@ -2,14 +2,11 @@ version: '3.3'
 
 services:
   frontend:
-    image: ilab-frontend
     build:
       context: ./frontend
       dockerfile: Dockerfile
     volumes:
-      - .:/app
-      - /app/node_modules
-      - /app/.next
+      - ./frontend:/app
     ports:
       - "3000:3000"
 
@@ -47,7 +44,7 @@ services:
     depends_on:
       - postgres
     environment:
-      - DATABASE_URL=postgresql://root:example@postgres:5432/labs_db
+      - DATABASE_URL=postgresql://root:example@localhost:5432/labs_db
 
 volumes:
   postgres_data:

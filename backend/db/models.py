@@ -19,9 +19,6 @@ class MergedSheet(Base):
     order_date = Column(DateTime)
     date_time = Column(String)
 
-    def __repr__(self):
-        return f"<MergedSheet(id={self.id}, order_id={self.order_id})>"
-
 class SummarySheet(Base):
     """Represents a summary sheet in the database."""
     __tablename__ = "summarysheet"
@@ -29,9 +26,6 @@ class SummarySheet(Base):
     id = Column(Integer, primary_key=True, index=True)
     description = Column(String)
     total = Column(Float)
-
-    def __repr__(self):
-        return f"<SummarySheet(id={self.id}, description={self.description})>"
 
 class GroupedSheet(Base):
     """Represents a grouped sheet in the database."""
@@ -43,9 +37,6 @@ class GroupedSheet(Base):
     invoice_amt = Column(Float)
     total = Column(Float)
 
-    def __repr__(self):
-        return f"<GroupedSheet(id={self.id}, order_id={self.order_id})>"
-
 class BaseSheet(Base):
     """Base class for various sheet types."""
     __abstract__ = True
@@ -55,9 +46,6 @@ class BaseSheet(Base):
     transaction_type = Column(String)
     invoice_amt = Column(Float)
     total = Column(Float)
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__}(id={self.id}, order_id={self.order_id})>"
 
 class RemovalOrderIDsSheet(BaseSheet):
     """Represents a sheet for removal order IDs."""
@@ -93,9 +81,6 @@ class ToleranceBaseSheet(Base):
     invoice_amt = Column(Float)
     total = Column(Float)
     tolerance_status = Column(String)
-
-    def __repr__(self):
-        return f"<{self.__class__.__name__}(id={self.id}, order_id={self.order_id}, tolerance_status={self.tolerance_status})>"
 
 class WithinToleranceSheet(ToleranceBaseSheet):
     """Represents a sheet for items within tolerance."""

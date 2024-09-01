@@ -60,13 +60,13 @@ def categorize_tolerance(row: pd.core.series.Series) -> str:
     
     if 0 < pna <= 300:
         return 'Within Tolerance' if percentage > 50 else 'Tolerance Breached'
-    elif 301 < pna <= 500:
+    if 301 < pna <= 500:
         return 'Within Tolerance' if percentage > 45 else 'Tolerance Breached'
-    elif 501 < pna <= 900:
+    if 501 < pna <= 900:
         return 'Within Tolerance' if percentage > 43 else 'Tolerance Breached'
-    elif 901 < pna <= 1500:
+    if 901 < pna <= 1500:
         return 'Within Tolerance' if percentage > 38 else 'Tolerance Breached'
-    elif pna > 1500:
+    if pna > 1500:
         return 'Within Tolerance' if percentage > 30 else 'Tolerance Breached'
     return 'Tolerance Breached'
     

@@ -7,7 +7,7 @@ const pt_serif = PT_Serif_Caption({
   weight: '400',
   subsets: ['latin'],
   display: 'swap',
-});
+})
 
 export default async function Home() {
   
@@ -32,5 +32,5 @@ export default async function Home() {
         <Nextbutton />
       </div>
     </div>
-  );
+  )
 }

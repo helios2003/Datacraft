@@ -18,6 +18,7 @@ const pt_serif = PT_Serif_Caption({
 
 export default function Upload() {
   const router = useRouter()
+  
   const [files, setFiles] = useState<File[]>([])
   const [uploaded, setUploaded] = useState<boolean>(false)
 
@@ -60,10 +61,10 @@ export default function Upload() {
         })
 
         if (response.status === 200) {
-          toast.success("Files have been uploaded successfully")
+          toast.success('Files have been uploaded successfully')
           setUploaded(true)
         } else {
-          toast.error("Something went wrong. Plase try again")
+          toast.error('Something went wrong. Plase try again')
         }
       } catch (error) {
         toast.error('Oops, there is an error from your side')
@@ -76,10 +77,10 @@ export default function Upload() {
         if (response.status === 200) {
           setFiles([])
           setUploaded(false)
-          toast.success("Your data is ready to be viewed")
+          toast.success('Your data is ready to be viewed')
           router.push('/dashboard')
         } else {
-          toast.error("Something went wrong. Plase try again")
+          toast.error('Something went wrong. Plase try again')
         }
       } catch(error) {
         toast.error('Oops, there is an error from your side')

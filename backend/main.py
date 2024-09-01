@@ -4,11 +4,19 @@ This module contains the API definitions for file uploads and processing.
 import os
 import glob
 import shutil
+import logging
 from typing import List
 from uuid import uuid4
 from urllib.parse import unquote
 import pandas as pd
-from fastapi import FastAPI, File, UploadFile, HTTPException, status
+from fastapi import (
+    FastAPI, 
+    File, 
+    UploadFile, 
+    HTTPException, 
+    status
+)
+from json_log_formatter import JSONFormatter
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import func, text
 from sqlalchemy.future import select
@@ -40,6 +48,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+json_handler = logging.FileHandler('app.json')
+json_formatter = JSONFormatter()
+json_handler.setFormatter(json_formatter)
+logger.addHandler(json_handler)
+
 @app.get('/') 
 def root() -> dict:
     """
@@ -70,6 +86,7 @@ def upload_files(files: List[UploadFile] = File(...)) -> dict:
         500: Internal Server Error
     """
     try:
+        logger.info('Received request to upload files.')
         if len(files) != 2:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -340,12 +357,10 @@ def get_charts_data():
         if '_sa_instance_state' in df.columns:
             df = df.drop(columns=['_sa_instance_state'])
 
-        key_col = df.columns[0]
-        value_col = df.columns[1]
-        df = df[~((df[key_col] == 'Product A') | 
-                  (df[key_col] == 'To account ending with:'))]
+        df = df[~((df['description'] == 'Product A') | 
+                  (df['description'] == 'To account ending with:'))]
         
-        result_dict = df.set_index(key_col)[value_col].abs().to_dict()
+        result_dict = df.set_index('description')['total'].abs().to_dict()
         
         return result_dict
     except Exception as e:
