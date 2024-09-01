@@ -1,17 +1,17 @@
-"use client"
+'use client'
 
-import Navbar from "@/components/utils/Navbar"
-import { useDropzone } from "react-dropzone"
-import { useCallback, useState } from "react"
-import { PT_Serif_Caption } from "next/font/google"
-import Processbutton from "@/components/buttons/Processbutton"
-import { FaUpload } from "react-icons/fa6"
-import axios from "axios"
+import Navbar from '@/components/utils/Navbar'
+import { useDropzone } from 'react-dropzone'
+import { useCallback, useState } from 'react'
+import { PT_Serif_Caption } from 'next/font/google'
+import Processbutton from '@/components/buttons/Processbutton'
+import { FaUpload } from 'react-icons/fa6'
+import axios from 'axios'
 
 const pt_serif = PT_Serif_Caption({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
 })
 
 export default function Upload() {
@@ -28,55 +28,55 @@ export default function Upload() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      "text/csv": [".csv"],
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
-        ".xlsx",
+      'text/csv': ['.csv'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': [
+        '.xlsx',
       ],
     },
     maxFiles: 2,
   })
 
   const removeFile = (fileRemoved: File) => {
-    setFiles(files.filter((file: File) => file != fileRemoved))
+    setFiles(files.filter((file: File) => file !== fileRemoved))
   }
 
   const handleSubmit = async () => {
     const formData = new FormData()
 
     files.forEach((file: File) => {
-      formData.append("files", file)
+      formData.append('files', file)
     })
 
     if (!uploaded) {
       try {
-        const uploadURL = "http://localhost:8000/upload"
+        const uploadURL = 'http://localhost:8000/upload'
         const response = await axios.post(uploadURL, formData, {
           headers: {
-            "Content-Type": "multpart/form-data",
+            'Content-Type': 'multpart/form-data',
           },
         })
         if (response.status === 200) {
           setFiles([])
           setUploaded(true)
-          alert("Files uploaded successfully")
+          alert('Files uploaded successfully')
         } else {
-          alert("Please Try again")
+          alert('Please Try again')
         }
       } catch (error) {
-        alert("Oops, there is an error from your side")
+        alert('Oops, there is an error from your side')
       }
     } else {
       try {
-        const processURL = "http://localhost:8000/process"
+        const processURL = 'http://localhost:8000/process'
         const response = await axios.get(processURL)
         if (response.status === 200) {
           setUploaded(false)
-          alert("Files processed successfully")
+          alert('Files processed successfully')
         } else {
-          alert("Please try again")
+          alert('Please try again')
         }
       } catch(error) {
-        alert("Oops, there is an error from your side")
+        alert('Oops, there is an error from your side')
       }
     }
   }
@@ -86,7 +86,7 @@ export default function Upload() {
       <div
         className={`flex flex-col items-center justify-center space-y-12 ${pt_serif.className}`}
       >
-        <Navbar heading="Upload Section" />
+        <Navbar />
         <div className="mt-12 text-5xl font-extrabold text-purple-500">
           Upload Your Transaction Sheets Here
         </div>
@@ -95,16 +95,16 @@ export default function Upload() {
             {...getRootProps()}
             className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors h-40 flex flex-col justify-center items-center ${
               isDragActive
-                ? "border-purple-600 bg-purple-50"
-                : "border-gray-300 hover:border-purple-400"
-            } ${files.length >= 2 ? "opacity-50 cursor-not-allowed" : ""}`}
+                ? 'border-purple-600 bg-purple-50'
+                : 'border-gray-300 hover:border-purple-400'
+            } ${files.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             <FaUpload className="text-gray-500 h-10 w-10 m-2" />
             <input {...getInputProps()} disabled={files.length >= 2} />
             <p className="text-sm text-gray-600">
               {files.length >= 2
-                ? "Maximum files reached"
-                : "Drag 'n' drop some files here, or click to select files"}
+                ? 'Maximum files reached'
+                : 'Drag \'n\' drop some files here, or click to select files'}
             </p>
             <p className="text-xs text-gray-500 mt-2">
               (Only *.csv, and *.xlsx files will be accepted <br />

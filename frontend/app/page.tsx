@@ -1,19 +1,19 @@
-import Navbar from "@/components/utils/Navbar"
-import Nextbutton from "@/components/buttons/Nextbutton"
-import Image from "next/image"
-import { PT_Serif_Caption } from "next/font/google"
+import Navbar from '@/components/utils/Navbar'
+import Nextbutton from '@/components/buttons/Nextbutton'
+import Image from 'next/image'
+import { PT_Serif_Caption } from 'next/font/google'
 
 const pt_serif = PT_Serif_Caption({
-  weight: "400",
-  subsets: ["latin"],
-  display: "swap",
+  weight: '400',
+  subsets: ['latin'],
+  display: 'swap',
 });
 
 export default async function Home() {
   
   return (
     <div className={`${pt_serif.className}`}>
-      <Navbar heading="Datacraft"/>
+      <Navbar />
       <div className="flex flex-col items-center justify-center text-center ">
         <div>
           <Image src="/home.png" height={400} width={400} alt="Home Page"/>
@@ -29,7 +29,7 @@ export default async function Home() {
           </h2>
           <br />
         </div>
-          <Nextbutton />
+        <Nextbutton />
       </div>
     </div>
   );

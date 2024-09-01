@@ -1,14 +1,14 @@
-"use client"
+'use client'
 
-import axios from "axios"
-import { useEffect, useState } from "react"
-import { CSSProperties } from "react"
-import { RingLoader } from "react-spinners"
+import axios from 'axios'
+import { useEffect, useState } from 'react'
+import { CSSProperties } from 'react'
+import { RingLoader } from 'react-spinners'
 
 const override: CSSProperties = {
-  display: "block",
-  margin: "0 auto",
-  borderColor: "purple",
+  display: 'block',
+  margin: '0 auto',
+  borderColor: 'purple',
 }
 
 interface tableProps {

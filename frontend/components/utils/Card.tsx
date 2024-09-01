@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import { MdNavigateNext } from "react-icons/md"
-import { useRouter } from "next/navigation"
+import { MdNavigateNext } from 'react-icons/md'
+import { useRouter } from 'next/navigation'
 
 interface CardProps {
   title: string
@@ -9,30 +9,30 @@ interface CardProps {
 }
 
 function CommaSeparation(value: string) {
-  let formattedString = ""
+  let formattedString = ''
   let counter = 0;
-  const num = value.split(".")[0];
-  const fraction = value.split(".")[1] === undefined ? "" : value.split(".")[1];
+  const num = value.split('.')[0];
+  const fraction = value.split('.')[1] === undefined ? '' : value.split('.')[1];
 
   if (num.length <= 3) {
-    return num + "." + fraction
+    return num + '.' + fraction
   }
 
   for (let i = num.length - 1; i >= 1; i--) {
     formattedString += num[i];
-    if (counter % 3 == 2) {
-      formattedString += ","
+    if (counter % 3 === 2) {
+      formattedString += ','
     }
     counter++
   }
 
   formattedString += num[0]
-  let finalValue = ""
+  let finalValue = ''
 
   if (fraction) {
-    finalValue = formattedString.split("").reverse().join("") + "." + fraction
+    finalValue = formattedString.split('').reverse().join('') + '.' + fraction
   } else {
-    finalValue = formattedString.split("").reverse().join("")
+    finalValue = formattedString.split('').reverse().join('')
   }
   return finalValue
 }

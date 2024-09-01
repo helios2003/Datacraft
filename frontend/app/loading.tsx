@@ -1,12 +1,12 @@
-"use client"
+'use client'
 
-import { CSSProperties } from "react"
-import { RingLoader } from "react-spinners"
+import { CSSProperties } from 'react'
+import { RingLoader } from 'react-spinners'
 
 const override: CSSProperties = {
-  display: "block",
-  margin: "0 auto",
-  borderColor: "purple",
+  display: 'block',
+  margin: '0 auto',
+  borderColor: 'purple',
 }
 
 export default function Loading() {

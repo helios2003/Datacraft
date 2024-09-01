@@ -1,22 +1,33 @@
 """
 This module contains the API definitions for file uploads and processing.
 """
-
 import os
 import glob
 import shutil
 from typing import List
 from uuid import uuid4
+from urllib.parse import unquote
 import pandas as pd
 from fastapi import FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from helper.functions import delete_files_in_directory, copy_cols_data, categorize_tolerance, generate_grouped_table
-from db.init import engine, Session
-from db.models import MergedSheet, GroupedSheet, OrderPaymentReceivedSheet, ReturnSheet, PaymentPendingSheet, NegativePayoutsSheet, ToleranceBreachedSheet
 from sqlalchemy import func, text
-from urllib.parse import unquote
 from sqlalchemy.future import select
-from db.init import table_exists
+from helper.functions import (
+    delete_files_in_directory,
+    copy_cols_data,
+    categorize_tolerance,
+    generate_grouped_table
+)
+from db.init import engine, Session, table_exists
+from db.models import (
+    GroupedSheet,
+    SummarySheet,
+    OrderPaymentReceivedSheet,
+    ReturnSheet,
+    PaymentPendingSheet,
+    NegativePayoutsSheet,
+    ToleranceBreachedSheet
+)
 
 session = Session()
 
@@ -319,7 +330,31 @@ def get_summary() -> dict:
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while obtaining the tables"
         ) from e 
+
+@app.get('/generate/charts')
+def get_charts_data():
+    try:
+        statement = session.query(SummarySheet).all()
+        df = pd.DataFrame([row.__dict__ for row in statement])
         
+        if '_sa_instance_state' in df.columns:
+            df = df.drop(columns=['_sa_instance_state'])
+
+        key_col = df.columns[0]
+        value_col = df.columns[1]
+        df = df[~((df[key_col] == 'Product A') | 
+                  (df[key_col] == 'To account ending with:'))]
+        
+        result_dict = df.set_index(key_col)[value_col].abs().to_dict()
+        
+        return result_dict
+    except Exception as e:
+        print(e)
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="An error occurred while obtaining the chart data"
+        ) from e 
+
 @app.get('/table')
 def get_table(table_name: str) -> dict:
     """
@@ -336,6 +371,7 @@ def get_table(table_name: str) -> dict:
         404: If the table is not found 
         500: If server side error exists
     """
+    # decode the URL coming from the frontend
     decoded_name = unquote(table_name)
     name_mapping = {
         "Previous Month Order": "groupedsheet",

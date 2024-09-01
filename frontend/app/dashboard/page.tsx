@@ -1,48 +1,102 @@
-"use client"
+"use client";
 
-import Card from "@/components/utils/Card"
-import Navbar from "@/components/utils/Navbar"
-import axios from "axios"
-import { useEffect, useState } from "react"
+import { useEffect, useState } from "react";
+import axios from "axios";
+import Card from "@/components/utils/Card";
+import Navbar from "@/components/utils/Navbar";
+import PieChart from "@/components/chart/PieChart";
+import BarChart from "@/components/chart/BarChart";
 
-interface dataProps {
-  distinct_count: string,
-  order_payment_received: string,
-  payment_pending: string,
-  tolerance_breached: string,
-  return_sheet: string,
-  negative_payout: string
+interface DataProps {
+  distinct_count: string;
+  order_payment_received: string;
+  payment_pending: string;
+  tolerance_breached: string;
+  return_sheet: string;
+  negative_payout: string;
+}
+
+interface ChartData {
+  [key: string]: number;
 }
 
 export default function Dashboard() {
-  const [data, setData] = useState<dataProps>()
+  const [data, setData] = useState<DataProps>();
+  const [chartData, setChartData] = useState<ChartData>({});
 
   async function getData() {
     try {
-
-      const dataURL = 'http://localhost:8000/data/summary'
-      const response = await axios.get(dataURL)
-
+      const dataURL = "http://localhost:8000/generate/summary";
+      const response = await axios.get(dataURL);
       if (response.status === 200) {
-        console.log(response)
-        setData(response.data)
+        setData(response.data);
       } else {
-        console.error("Sorry, the server is not responding")
+        console.error("Sorry, the server is not responding");
       }
     } catch (error) {
-      console.error("Oops!!, error fetching data")
+      console.error("Oops!!, error fetching data");
+    }
+  }
+
+  async function getChartData() {
+    try {
+      const chartURL = "http://localhost:8000/generate/charts";
+      const response = await axios.get(chartURL);
+      if (response.status === 200) {
+        setChartData(response.data);
+      } else {
+        console.error("Sorry, the server is not responding");
+      }
+    } catch (error) {
+      console.error("Oops!!, error fetching data");
     }
   }
 
   useEffect(() => {
-    getData()
-  }, [])
+    getData();
+    getChartData();
+  }, []);
 
+  const pieChartData = Object.entries(chartData).map(
+    ([label, value], index) => {
+      const itemCount = Object.keys(chartData).length;
+      const lightness = 80 - (index / (itemCount - 2.5)) * 50;
+      return {
+        label,
+        value,
+        color: `hsl(270, 70%, ${lightness}%)`,
+      };
+    }
+  );
+
+  const generateData = (chartData: ChartData) => {
+    const itemCount = Object.keys(chartData).length;
+
+    const colors = Object.entries(chartData).map(([label, value], index) => {
+      const lightness = 80 - (index / (itemCount - 1)) * 50;
+      return `hsl(270, 70%, ${lightness}%)`;
+    });
+
+    return {
+      labels: Object.keys(chartData),
+      datasets: [
+        {
+          label: "Customer data",
+          data: Object.values(chartData),
+          backgroundColor: colors,
+          borderColor: colors,
+          borderWidth: 1,
+        },
+      ],
+    };
+  };
+
+  const barGraphData = generateData(chartData);
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Navbar heading="Dashboard"/>
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="min-h-screen bg-gray-100 flex flex-col overflow-hidden">
+      <Navbar />
+      <div className="flex-grow flex flex-col p-4 overflow-hidden">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
           <Card title="Previous Month Order" value={data?.distinct_count!} />
           <Card title="Order & Payment Received" value={data?.order_payment_received!} />
           <Card title="Payment Pending" value={data?.payment_pending!} />
@@ -50,7 +104,15 @@ export default function Dashboard() {
           <Card title="Return" value={data?.return_sheet!} />
           <Card title="Negative Payout" value={data?.negative_payout!} />
         </div>
+        <div className="flex flex-col lg:flex-row gap-2 flex-grow">
+          <div className="w-full lg:w-1/2 h-80">
+            <PieChart data={pieChartData} />
+          </div>
+          <div className="w-full lg:w-1/2 h-96">
+            <BarChart data={barGraphData} />
+          </div>
+        </div>
       </div>
     </div>
-  )
+  );
 }

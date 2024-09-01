@@ -1,6 +1,6 @@
-"use client"
+'use client'
 
-import { useState } from "react"
+import { useState } from 'react'
 
 interface ProcessbuttonProps {
   filesSize: number
@@ -27,7 +27,7 @@ export default function Processbutton({ filesSize, onClick, uploadStatus }: Proc
         onMouseLeave={() => setHover(false)}
         onClick={onClick}
       >
-        {uploadStatus ? "Start Processing" : "Start Uploading"}
+        {uploadStatus ? 'Start Processing' : 'Start Uploading'}
       </button>
     </div>
   );

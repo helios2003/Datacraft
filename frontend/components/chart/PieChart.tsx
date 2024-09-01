@@ -1,37 +1,65 @@
-"use client"
+'use client'
 
-import { Pie } from "react-chartjs-2"
+import { Pie } from 'react-chartjs-2'
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from 'chart.js'
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement)
 
 interface chartInput {
-    label: string,
-    value: number,
-    color: string
+  label: string,
+  value: number,
+  color: string
 }
 
 interface chartInputProps {
-    data: chartInput[]
+  data: chartInput[]
 }
 
 export default function PieChart({ data }: chartInputProps) {
-    const chartData = {
-        labels: data.map(item => item.label),
-        datasets: [
-            {
-                label: "Statistics Chart",
-                data: data.map(item => item.value),
-                backgroundColor: data.map(item => item.color),
-                borderColor: data.map(item => item.color),
-                borderWidth: 1,
-            }
-        ]
-    }
+  const chartData = {
+    labels: data.map(item => item.label),
+    datasets: [
+      {
+        label: 'Statistics Chart',
+        data: data.map(item => item.value),
+        backgroundColor: data.map(item => item.color),
+        borderColor: data.map(item => item.color),
+        borderWidth: 1,
+      },
+    ],
+  }
 
-    return (
-        <>
-            <Pie data={chartData} />
-        </>
-    )
+  const options = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'right' as const,
+        align: 'center' as const,
+        labels: {
+          boxWidth: 10,
+          padding: 10,
+          font: {
+            size: 12
+          }
+        },
+      },
+      tooltip: {
+        callbacks: {
+          label: function (tooltipItem: any) {
+            return `${tooltipItem.label}: ${tooltipItem.raw}`;
+          }
+        }
+      },
+    },
+    layout: {
+      padding: 10,
+    }
+  }
+
+  return (
+    <div style={{ width: '100%', height: '300px' }}>
+      <Pie data={chartData} options={options} />
+    </div>
+  )
 }

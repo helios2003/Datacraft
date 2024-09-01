@@ -68,8 +68,7 @@ def categorize_tolerance(row: pd.core.series.Series) -> str:
         return 'Within Tolerance' if percentage > 38 else 'Tolerance Breached'
     elif pna > 1500:
         return 'Within Tolerance' if percentage > 30 else 'Tolerance Breached'
-    else:
-        return 'Tolerance Breached'
+    return 'Tolerance Breached'
     
 def generate_grouped_table() -> None:
     """
