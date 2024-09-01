@@ -1,0 +1,194 @@
+---
+openapi: 3.1.0
+info:
+  title: FastAPI
+  version: 0.1.0
+paths:
+  "/":
+    get:
+      summary: Root
+      description: "Root endpoint\n\nArgs:\n    None\n    \nReturns:\n    JSON: A
+        welcome message."
+      operationId: root__get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                title: Response Root  Get
+  "/upload":
+    post:
+      summary: Upload Files
+      description: "Upload endpoint which accepts user's files\n\nArgs:\n    files:
+        List of 2 files\n    \nReturns:\n    JSON: A JSON object informing the status
+        of the request\n    \nStatus:\n    200: Successful upload\n    400: If 2 files
+        are not uploaded\n    500: Internal Server Error"
+      operationId: upload_files_upload_post
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              "$ref": "#/components/schemas/Body_upload_files_upload_post"
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                title: Response Upload Files Upload Post
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+  "/process":
+    get:
+      summary: Process Files
+      description: "Preprocess the data according to the task's instructions\n\nArgs:\n
+        \   None\n    \nStatus:\n    200: On successful preprocessing\n    500: Internal
+        Server Error"
+      operationId: process_files_process_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                title: Response Process Files Process Get
+  "/generate/tables":
+    get:
+      summary: Generate Tables
+      description: |-
+        Creates all the relevant tables after processing the datasets
+
+        Args:
+            None
+
+        Returns:
+            dict: a success message
+
+        Status:
+            200: If all the preprocessing steps were successful
+            500: If server side error exists
+      operationId: generate_tables_generate_tables_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                title: Response Generate Tables Generate Tables Get
+  "/generate/summary":
+    get:
+      summary: Get Summary
+      description: |-
+        Extract the necessary information from the uploaded datasets
+
+        Args:
+            None
+
+        Returns:
+            dict: the relevant data
+
+        Status:
+            200: Returns the data successfully
+            500: If server side error exists
+      operationId: get_summary_generate_summary_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                title: Response Get Summary Generate Summary Get
+  "/generate/charts":
+    get:
+      summary: Get Charts Data
+      operationId: get_charts_data_generate_charts_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  "/table":
+    get:
+      summary: Get Table
+      description: "Retrieve data from a specified table in the database.\n\nArgs:\n
+        \   table_name (str): URL encoded table name\n\nReturns:\n    dict: the relevant
+        table in the dictonary format\n\nStatus:\n    200: Returns the table succcesfully\n
+        \   404: If the table is not found \n    500: If server side error exists"
+      operationId: get_table_table_get
+      parameters:
+      - name: table_name
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Table Name
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                type: object
+                title: Response Get Table Table Get
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+components:
+  schemas:
+    Body_upload_files_upload_post:
+      properties:
+        files:
+          items:
+            type: string
+            format: binary
+          type: array
+          title: Files
+      type: object
+      required:
+      - files
+      title: Body_upload_files_upload_post
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError

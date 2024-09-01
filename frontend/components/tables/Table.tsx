@@ -11,14 +11,15 @@ const override: CSSProperties = {
   borderColor: 'purple',
 }
 
-interface tableProps {
+interface TableProps {
   tableName: string
 }
 
-export default function Table({ tableName }: tableProps) {
+export default function Table({ tableName }: TableProps) {
 
   const [data, setData] = useState<any[]>([])
-  const [loading, setLoading] = useState<Boolean>(true)
+  const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<boolean>(false)
 
   const getTable = useCallback(async () => {
     setLoading(true)
@@ -28,9 +29,13 @@ export default function Table({ tableName }: tableProps) {
       )
       if (response.status === 200) {
         setData(response.data.data)
+        setError(false)
+      } else if (response.status === 404) {
+        setError(true)
       }
     } catch (error) {
       console.error(error)
+      setError(true)
     } finally {
       setLoading(false)
     }
@@ -45,44 +50,40 @@ export default function Table({ tableName }: tableProps) {
       <h2 className="text-xl pl-12 pt-4 font-semibold">{tableName}</h2>
       <div className="container mx-auto p-2">
         <div className="flex justify-between items-center mb-4"></div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full bg-white">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Net Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Invoice Amount
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
-                  Transaction Type
-                </th>
-              </tr>
-            </thead>
-            {loading ? (
-              <tbody>
+        {loading ? (
+          <div className="flex flex-col items-center justify-center">
+            <RingLoader
+              loading={true}
+              cssOverride={override}
+              size={50}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
+            <p className="mt-4 text-xl text-purple-600">The data is loading</p>
+          </div>
+        ) : error ? (
+          <div className="text-center text-red-600">
+            <p className="text-xl">Table not found or an error occurred</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="min-w-full bg-white">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={4} className="px-6 py-4 text-center">
-                    <div className="flex flex-col items-center justify-center">
-                      <RingLoader
-                        loading={true}
-                        cssOverride={override}
-                        size={50}
-                        aria-label="Loading Spinner"
-                        data-testid="loader"
-                      />
-                      <p className="mt-4 text-xl text-purple-600">
-                        The data is loading
-                      </p>
-                    </div>
-                  </td>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Order ID
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Net Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Invoice Amount
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                    Transaction Type
+                  </th>
                 </tr>
-              </tbody>
-            ) : (
+              </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {data.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
@@ -101,9 +102,9 @@ export default function Table({ tableName }: tableProps) {
                   </tr>
                 ))}
               </tbody>
-            )}
-          </table>
-        </div>
+            </table>
+          </div>
+        )}
       </div>
     </>
   )

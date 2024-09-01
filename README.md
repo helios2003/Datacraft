@@ -36,11 +36,12 @@ host_name="localhost"
 - Spin it up and connect it with the backend.
 <br /> <br />
 
-**To View the Tables in pgAdmin4** <br /> 
-Follow the given steps
+#### To View the Tables in pgAdmin4 
+Follow the given steps:
 - In the home page of pgadmin4, click on ``Add Servers`` icon.
 - This will open a pop up which contains few inputs to be given.
 - Give the following inputs.
+
 ```conf
 "Name": "local db",
 "Group": "Server",
@@ -53,23 +54,130 @@ Follow the given steps
 ```
 ## Tasks Completed
 ### Data Processing
-- [x] Create the Merged Sheet.
-- [x] Group the dataset.
-- [x] Create the 6 main tables.
-- [x] Create the Tolerance Level table.
+- [x] Created the Merged Sheet.
+- [x] Grouped the dataset.
+- [x] Created the 6 main tables.
+- [x] Created the Tolerance Level table.
 ### Frontend
-- [x] Make a responsive UI.
-- [x] Use Typescript.
-- [x] Create summaries and view the processed tables.
+- [x] Made a responsive UI.
+- [x] Used Typescript.
+- [x] Created summaries to view the processed tables.
 
 ### Backend
-- [x] Create endpoints for processing the uplaoding the dataset to database.
-- [x] Functions for all the ELT processes.
+- [x] Created endpoints for processing the uplaoding the dataset to database.
+- [x] Designed functions for all the ELT processes.
 
 ### Deployment
-- [x] Containerize the frontend, backend and the database.
-- [x] Create the ``docker-compose.yml`` file.
-- [x] Implement pre commit hooks.
+- [x] Containerized the frontend, backend and the database.
+- [x] Created the ``docker-compose.yml`` file.
+- [x] Implemented pre commit hooks.
+
+## Tasks to be completed
+- [ ] Implementing Pydantic for type checking and data validation.
+- [ ] Setting up the CD pipeline.
+
+## API Design
+I have used REST APIs for the project. You can find the spec file [here](backend/openapi_spec.yaml).
+
+## Schema Design
+The database schema design can be found below.
+
+```mermaid
+classDiagram
+    Base <|-- MergedSheet
+    Base <|-- SummarySheet
+    Base <|-- GroupedSheet
+    Base <|-- BaseSheet
+    Base <|-- ToleranceBaseSheet
+    BaseSheet <|-- RemovalOrderIDsSheet
+    BaseSheet <|-- ReturnSheet
+    BaseSheet <|-- NegativePayoutsSheet
+    BaseSheet <|-- OrderPaymentReceivedSheet
+    BaseSheet <|-- OrderNotApplicableSheet
+    BaseSheet <|-- PaymentPendingSheet
+    ToleranceBaseSheet <|-- WithinToleranceSheet
+    ToleranceBaseSheet <|-- ToleranceBreachedSheet
+
+    class Base {
+        <<abstract>>
+    }
+
+    class MergedSheet {
+        -Integer id
+        -String order_id
+        -String transaction_type
+        -String payment_type
+        -Float invoice_amt
+        -Float total
+        -String description
+        -DateTime order_date
+        -String date_time
+    }
+
+    class SummarySheet {
+        -Integer id
+        -String description
+        -Float total
+    }
+
+    class GroupedSheet {
+        -Integer id
+        -String order_id
+        -String transaction_type
+        -Float invoice_amt
+        -Float total
+    }
+
+    class BaseSheet {
+        <<abstract>>
+        -Integer id
+        -String order_id
+        -String transaction_type
+        -Float invoice_amt
+        -Float total
+    }
+
+    class RemovalOrderIDsSheet {
+    }
+
+    class ReturnSheet {
+    }
+
+    class NegativePayoutsSheet {
+    }
+
+    class OrderPaymentReceivedSheet {
+    }
+
+    class OrderNotApplicableSheet {
+    }
+
+    class PaymentPendingSheet {
+    }
+
+    class ToleranceBaseSheet {
+        <<abstract>>
+        -Integer id
+        -String order_id
+        -String transaction_type
+        -Float invoice_amt
+        -Float total
+        -String tolerance_status
+    }
+
+    class WithinToleranceSheet {
+    }
+
+    class ToleranceBreachedSheet {
+    }
+```
+
+## List of issues and potential improvements
+- The UI of the pages can be improved.
+- A loader can be shown while the processing is happening because the processing and generating the tables takes roughly 8-10 seconds.
+- Adding data validation for inserting into the database.
+- Pagination can be done for the tables shown.
+- Automatic deployment to AWS or DockerHub on every push to main branch can be added.
 
 ## Tech Stack
 - FastAPI in the backend + Pandas for the data preprocessing.

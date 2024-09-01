@@ -1,4 +1,0 @@
-- use pydantic
-- fix the deployment with docker
-- pylint
-- logging
