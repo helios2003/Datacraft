@@ -10,10 +10,11 @@ from uuid import uuid4
 import pandas as pd
 from fastapi import FastAPI, File, UploadFile, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
-from helper.functions import delete_files_in_directory, copy_cols_data, categorize_tolerance
+from helper.functions import delete_files_in_directory, copy_cols_data, categorize_tolerance, generate_grouped_table
 from db.init import engine, Session
 from db.models import MergedSheet, GroupedSheet, OrderPaymentReceivedSheet, ReturnSheet, PaymentPendingSheet, NegativePayoutsSheet, ToleranceBreachedSheet
 from sqlalchemy import func, text
+from urllib.parse import unquote
 from sqlalchemy.future import select
 from db.init import table_exists
 
@@ -29,11 +30,13 @@ app.add_middleware(
 )
 
 @app.get('/') 
-def root():
+def root() -> dict:
     """
     Root endpoint
+    
     Args:
         None
+        
     Returns:
         JSON: A welcome message.
     """
@@ -43,10 +46,13 @@ def root():
 def upload_files(files: List[UploadFile] = File(...)) -> dict:
     """
     Upload endpoint which accepts user's files
+    
     Args:
         files: List of 2 files
+        
     Returns:
         JSON: A JSON object informing the status of the request
+        
     Status:
         200: Successful upload
         400: If 2 files are not uploaded
@@ -88,11 +94,13 @@ def upload_files(files: List[UploadFile] = File(...)) -> dict:
         ) from e
         
 @app.get('/process')
-def process_files():
+def process_files() -> dict:
     """
     Preprocess the data according to the task's instructions
+    
     Args:
         None
+        
     Status:
         200: On successful preprocessing
         500: Internal Server Error
@@ -158,46 +166,26 @@ def process_files():
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail = "An error occured"
         ) from e
-        
-@app.get('/generate-tables')
-def generate_tables():
-    try:
-        statement = session.query(MergedSheet).all()
-        df = pd.DataFrame([row.__dict__ for row in statement])
-        
-        if '_sa_instance_state' in df.columns:
-            df = df.drop(columns=['_sa_instance_state'])
-            
-        df_filtered = df.dropna(subset=['order_id'])
-        
-        # Grouping the data by description
-        df_summary = df.groupby(['description']).agg({
-            'total': 'sum'
-        })
-        
-        # Grouping the data by order_id and then by transaction type
-        df_grouped = df_filtered.groupby(['order_id', 'transaction_type']).agg({
-            'invoice_amt': 'sum',
-            'total': 'sum'
-        }).reset_index()
-        
-        df_summary['id'] = range(1, len(df_summary) + 1)
-        df_grouped['id'] = range(1, len(df_grouped) + 1)
-        
-        df_summary.to_sql('summarysheet', engine, if_exists='replace')
-        df_grouped.to_sql('groupedsheet', engine, if_exists='replace')
-        
-        return {"msg": "Table generated, filtered, and grouped successfully"}
-    
-    except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred while generating tables"
-        ) from e
 
-@app.get('/generate-small-tables')        
-def generate_small_tables():
+@app.get('/generate/tables')        
+def generate_tables() -> dict:
+    """
+    Creates all the relevant tables after processing the datasets
+    
+    Args:
+        None
+
+    Returns:
+        dict: a success message
+
+    Status:
+        200: If all the preprocessing steps were successful
+        500: If server side error exists
+    """
     try:
+        # try grouping the table(s) as mentioned in the task
+        generate_grouped_table()
+        
         statement = session.query(GroupedSheet).all()
         df = pd.DataFrame([row.__dict__ for row in statement])
         
@@ -284,8 +272,21 @@ def generate_small_tables():
             detail="An error occurred while generating tables"
         ) from e       
     
-@app.get('/data/summary')
-def get_summary():
+@app.get('/generate/summary')
+def get_summary() -> dict:
+    """
+    Extract the necessary information from the uploaded datasets
+    
+    Args:
+        None
+
+    Returns:
+        dict: the relevant data
+
+    Status:
+        200: Returns the data successfully
+        500: If server side error exists
+    """
     try:
         distinct_count = session.execute(select(func.count(
             GroupedSheet.order_id.distinct()))).scalar()
@@ -314,32 +315,58 @@ def get_summary():
                 }
         
     except Exception as e:
-        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while obtaining the tables"
         ) from e 
         
 @app.get('/table')
-def get_table(table_name: str):
+def get_table(table_name: str) -> dict:
+    """
+    Retrieve data from a specified table in the database.
+    
+    Args:
+        table_name (str): URL encoded table name
+
+    Returns:
+        dict: the relevant table in the dictonary format
+
+    Status:
+        200: Returns the table succcesfully
+        404: If the table is not found 
+        500: If server side error exists
+    """
+    decoded_name = unquote(table_name)
+    name_mapping = {
+        "Previous Month Order": "groupedsheet",
+        "Order": "orderpaymentreceivedsheet",
+        "Payment Pending": "paymentpendingsheet",
+        "Tolerance Rate Breached": "tolerancebreachedsheet",
+        "Return": "returnsheet",
+        "Negative Payout": "negativepayoutssheet"
+    }
+    
+    act_table_name = name_mapping.get(decoded_name)   
     try:
-        if not table_exists(table_name):
+        if not table_exists(act_table_name):
             raise HTTPException(
                 status_code=404,
-                detail=f"Table '{table_name}' does not exist in the database."
+                detail=f"Table '{act_table_name}' does not exist in the database."
             )
-        query = text(f"SELECT * FROM {table_name}")
+            
+        query = text(f"SELECT * FROM {act_table_name}")
         result = session.execute(query)
         rows = result.fetchall()
         data = [dict(row._mapping) for row in rows]
+        
         return {"data": data}
     
     except Exception as e:
+        print(e)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while obtaining the tables"
         ) from e   
-    
     
 if __name__ == '__main__':
     import uvicorn

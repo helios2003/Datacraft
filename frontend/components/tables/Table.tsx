@@ -16,6 +16,7 @@ interface tableProps {
 }
 
 export default function Table({ tableName }: tableProps) {
+
   const [data, setData] = useState<any[]>([])
   const [loading, setLoading] = useState<Boolean>(true)
 

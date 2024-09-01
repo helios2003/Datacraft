@@ -51,7 +51,7 @@ export default function Card({ title, value }: CardProps) {
         <MdNavigateNext
           className="text-black cursor-pointer h-8 w-8 hover:text-gray-600"
           onClick={() => {
-            router.push(`/table?name=${title}`);
+            router.push(`/table?table_name=${title}`)
           }}
         />
       </div>
