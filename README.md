@@ -86,17 +86,10 @@ flowchart TD
     A[User] -->|/upload| B[Uploads Files]
     B --> C{Processing the tables}
     C --> D[Stores it in the database]
-    D --> E[View the stats]
-    E -->|/dashboard| F[Dashboard]
-    F -->|/table_name=name| G[View the table]
-
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#bbf,stroke:#333,stroke-width:2px
-    style C fill:#dfd,stroke:#333,stroke-width:2px
-    style D fill:#fdd,stroke:#333,stroke-width:2px
-    style E fill:#ddf,stroke:#333,stroke-width:2px
-    style F fill:#ffd,stroke:#333,stroke-width:2px
-    style G fill:#dff,stroke:#333,stroke-width:2px
+    D --> |/dashboard| E[Dashboard: View Statistics]
+    E -->|/table_name=name| F[View the table]
+    classDef darkNode fill:#333,stroke:#fff,stroke-width:2px,color:#fff;
+    class A,B,C,D,E,F,G darkNode;
 ```
 
 ## API Design
