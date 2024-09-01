@@ -76,6 +76,26 @@ Follow the given steps:
 - [ ] Implementing Pydantic for type checking and data validation.
 - [ ] Setting up the CD pipeline.
 
+## Design/Flow of the Project
+
+```mermaid
+flowchart TD
+    A[User] -->|/upload| B[Uploads Files]
+    B --> C{Processing the tables}
+    C --> D[Stores it in the database]
+    D --> E[View the stats]
+    E -->|/dashboard| F[Dashboard]
+    F -->|/table_name=name| G[View the table]
+
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style B fill:#bbf,stroke:#333,stroke-width:2px
+    style C fill:#dfd,stroke:#333,stroke-width:2px
+    style D fill:#fdd,stroke:#333,stroke-width:2px
+    style E fill:#ddf,stroke:#333,stroke-width:2px
+    style F fill:#ffd,stroke:#333,stroke-width:2px
+    style G fill:#dff,stroke:#333,stroke-width:2px
+```
+
 ## API Design
 I have used REST APIs for the project. You can find the spec file [here](backend/openapi_spec.yaml).
 
