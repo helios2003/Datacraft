@@ -20,7 +20,7 @@ host_name="postgres"
 
 #### Frontend
 - Go into the ``frontend`` folder.
-- Run ``npm install` to install the dependencies.
+- Run ``npm install`` to install the dependencies.
 - Run ``npm run dev``. By default the frontend runs on ``http://localhost:8000``.
 
 #### Backend
@@ -35,6 +35,7 @@ host_name="localhost"
 - Pull the PostgreSQL image from [DockerHub](https://hub.docker.com/_/postgres).
 - Spin it up and connect it with the backend.
 <br /> <br />
+
 **To View the Tables in pgAdmin4** <br /> 
 Follow the given steps
 - In the home page of pgadmin4, click on ``Add Servers`` icon.
