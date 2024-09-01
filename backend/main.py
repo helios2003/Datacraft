@@ -86,14 +86,20 @@ def upload_files(files: List[UploadFile] = File(...)) -> dict:
         500: Internal Server Error
     """
     try:
-        logger.info('Received request to upload files.')
         if len(files) != 2:
+            logger.warning('Invalid number of files received.', 
+                       extra={'expected': 2, 'received': len(files)})
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Please upload exactly two files"
             )
         if (files[0].filename.split('.')[-1] != 'xlsx' or 
             files[1].filename.split('.')[-1] != 'csv'):
+            
+            logger.warning('Invalid file type received.', 
+                           extra={'file_types': [files[0].filename.split('.')[-1], 
+                                                 files[1].filename.split('.')[-1]]})
+            
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid file type"
@@ -113,6 +119,11 @@ def upload_files(files: List[UploadFile] = File(...)) -> dict:
         
         with open(os.path.join('payment', payment_file), "wb") as buffer:
             shutil.copyfileobj(files[1].file, buffer)
+        
+        logger.info('Files uploaded successfully.', 
+                    extra={'merchant_file': merchant_file, 
+                           'payment_file': payment_file})
+        
         return {"msg": "Files uploaded successfully"}
             
     except Exception as e:
@@ -137,8 +148,14 @@ def process_files() -> dict:
         merchant_file_path = glob.glob(os.path.join('merchant', '*'))[0]
         payment_file_path = glob.glob(os.path.join('payment', '*'))[0]
         
+        logger.info('Files found', 
+                    extra={'merchant_file_path': merchant_file_path, 'payment_file_path': payment_file_path})
+        
         df_merchant = pd.DataFrame(pd.read_excel(merchant_file_path))
         df_payment = pd.read_csv(payment_file_path)
+        
+        logger.info('Files read successfully', 
+                    extra={'merchant_shape': df_merchant.shape, 'payment_shape': df_payment.shape})
         
         # preprocessing for merchant file        
         df_merchant = df_merchant[df_merchant["Transaction Type"] != "Cancel"]
@@ -159,6 +176,9 @@ def process_files() -> dict:
         df_payment["Payment Type"] = df_payment["Payment Type"].str.replace("Service Fee", "Order")
         df_payment["Payment Type"] = df_payment["Payment Type"].str.replace("Refund", "Return")
         df_payment["Transaction Type"] = "Payment"
+        
+        logger.info('DataFrames preprocessed', 
+                    extra={'merchant_shape_after': df_merchant.shape, 'payment_shape_after': df_payment.shape})
         
         # Merging the 2 dataframes
         df_merged_cols = ['Order Id', 'Transaction Type', 'Payment Type', 'Invoice Amount', 'total', 
@@ -186,10 +206,12 @@ def process_files() -> dict:
         df_mapped['total'] = df_mapped['total'].str.replace(',', '').astype(float)
         
         df_mapped.to_sql('mergedsheet', engine, if_exists='replace')
-
+        logger.info('DataFrames merged and saved to database')
+        
         return {"msg": "Your dataframes have been successfully processed"}
         
     except Exception as e:
+        logger.error('An error occurred during file processing', exc_info=True)
         raise HTTPException(
             status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail = "An error occured"
@@ -211,8 +233,10 @@ def generate_tables() -> dict:
         500: If server side error exists
     """
     try:
+        logger.info('Starting table generation')
         # try grouping the table(s) as mentioned in the task
         generate_grouped_table()
+        logger.info('Grouped table generated successfully')
         
         statement = session.query(GroupedSheet).all()
         df = pd.DataFrame([row.__dict__ for row in statement])
@@ -220,23 +244,28 @@ def generate_tables() -> dict:
         if '_sa_instance_state' in df.columns:
             df = df.drop(columns=['_sa_instance_state'])
         
+        logger.info('Data fetched from GroupedSheet', extra={'df_shape': df.shape})
+        
         # 1. Mark Removal Order IDs
         df_rem_ids = df.copy()
         df_rem_ids.loc[df_rem_ids['order_id'].str.len() == 10, 'order_id'] = 'Removal Order IDs'
         df_rem_ids['id'] = range(1, len(df_rem_ids) + 1)
+        logger.info('Marked Removal Order IDs', extra={'df_rem_ids_shape': df_rem_ids.shape})
         
         # 2. Mark Returns
         df_ret = df.copy()
         df_ret.loc[(df_ret['transaction_type'] == 'Return') & 
                    (df_ret['invoice_amt'].notna()), 'transaction_type'] = 'Return'
         df_ret['id'] = range(1, len(df_ret) + 1)
+        logger.info('Marked Returns', extra={'df_ret_shape': df_ret.shape})
         
         # 3. Mark Negative Payouts
         df_neg = df.copy()
         df_neg.loc[(df_neg['transaction_type'] == 'Payment') & 
                    (df_neg['total'] < 0), 'transaction_type'] = 'Negative Payout'
         df_neg['id'] = range(1, len(df_neg) + 1)
-
+        logger.info('Marked Negative Payouts', extra={'df_neg_shape': df_neg.shape})
+        
         # 4. Mark Order & Payment Received
         df_rec = df.copy()
         df_rec.loc[
@@ -246,6 +275,7 @@ def generate_tables() -> dict:
             'transaction_type'
         ] = 'Order & Payment Received'
         df_rec['id'] = range(1, len(df_rec) + 1)
+        logger.info('Marked Order & Payment Received', extra={'df_rec_shape': df_rec.shape})
 
         # 5. Mark Order Not Applicable but Payment Received
         df_not_app = df.copy()
@@ -256,7 +286,9 @@ def generate_tables() -> dict:
             'transaction_type'
         ] = 'Order Not Applicable but Payment Received'
         df_not_app['id'] = range(1, len(df_not_app) + 1)
-
+        logger.info('Marked Order Not Applicable but Payment Received', 
+                   extra={'df_not_app_shape': df_not_app.shape})
+        
         # 6. Mark Payment Pending
         df_pending = df.copy()
         df_pending.loc[
@@ -266,6 +298,7 @@ def generate_tables() -> dict:
             'transaction_type'
         ] = 'Payment Pending'
         df_pending['id'] = range(1, len(df_pending) + 1)
+        logger.info('Marked Payment Pending', extra={'df_pending_shape': df_pending.shape})
         
         # 7. Tolerance Breached or not Breached
         df_tolerance = df.copy()
@@ -281,6 +314,11 @@ def generate_tables() -> dict:
         df_within_tolerance['id'] = range(1, len(df_within_tolerance) + 1)
         df_tolerance_breached['id'] = range(1, len(df_tolerance_breached) + 1)
 
+        logger.info('Processed tolerance data', extra={
+            'df_within_tolerance_shape': df_within_tolerance.shape,
+            'df_tolerance_breached_shape': df_tolerance_breached.shape
+        })
+        
         # Store the dataframes in the DB
         df_rem_ids.to_sql('removalorderidssheet', con=engine, if_exists='replace')
         df_ret.to_sql('returnsheet', con=engine, if_exists='replace')
@@ -290,11 +328,13 @@ def generate_tables() -> dict:
         df_pending.to_sql('paymentpendingsheet', con=engine, if_exists='replace')
         df_within_tolerance.to_sql('withintolerancesheet', con=engine, if_exists='replace')
         df_tolerance_breached.to_sql('tolerancebreachedsheet', con=engine, if_exists='replace')
-            
+        
+        logger.info('All tables created successfully')
+        
         return {"msg": "All the tables have been created"}
     
     except Exception as e:
-        
+        logger.error('An error occurred while generating tables', exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while generating tables"
@@ -316,23 +356,32 @@ def get_summary() -> dict:
         500: If server side error exists
     """
     try:
+        logger.info('Request to get summary data started.')
+        
         distinct_count = session.execute(select(func.count(
             GroupedSheet.order_id.distinct()))).scalar()
+        logger.info('Retrieved distinct count of order IDs.', extra={'distinct_count': distinct_count})
         
         order_payment_received = session.query(OrderPaymentReceivedSheet).filter(
                         OrderPaymentReceivedSheet.transaction_type == 'Order & Payment Received').count()
+        logger.info('Retrieved count of "Order & Payment Received".', 
+                    extra={'order_payment_received': order_payment_received})
         
         payment_pending = session.query(PaymentPendingSheet).filter(
                         PaymentPendingSheet.transaction_type == 'Payment Pending').count() 
+        logger.info('Retrieved count of "Payment Pending".', extra={'payment_pending': payment_pending})
         
         tolerance_breached = session.query(ToleranceBreachedSheet).filter(
                         ToleranceBreachedSheet.tolerance_status == 'Tolerance Breached').count()
+        logger.info('Retrieved count of "Tolerance Breached".', extra={'tolerance_breached': tolerance_breached})
         
         return_sheet = session.query(ReturnSheet).filter(
                         ReturnSheet.transaction_type == 'Return').count()   
+        logger.info('Retrieved count of "Return".', extra={'return_sheet': return_sheet})
         
         negative_payout = session.query(NegativePayoutsSheet).filter(
                         NegativePayoutsSheet.transaction_type == 'Negative Payout').count() 
+        logger.info('Retrieved count of "Negative Payout".', extra={'negative_payout': negative_payout})
         
         return {"distinct_count": distinct_count,
                 "order_payment_received": order_payment_received,
@@ -343,6 +392,7 @@ def get_summary() -> dict:
                 }
         
     except Exception as e:
+        logger.error('An error occurred while obtaining the summary data', exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while obtaining the tables"
@@ -351,20 +401,29 @@ def get_summary() -> dict:
 @app.get('/generate/charts')
 def get_charts_data():
     try:
+        logger.info('Request to generate chart data started.')
         statement = session.query(SummarySheet).all()
+        
         df = pd.DataFrame([row.__dict__ for row in statement])
         
         if '_sa_instance_state' in df.columns:
             df = df.drop(columns=['_sa_instance_state'])
 
+        logger.info('Data retrieved from SummarySheet and DataFrame created.', 
+                    extra={'row_count': len(df)})
+        
         df = df[~((df['description'] == 'Product A') | 
                   (df['description'] == 'To account ending with:'))]
+        logger.info('Data filtered for unwanted descriptions.', 
+                    extra={'filtered_row_count': len(df)})
         
         result_dict = df.set_index('description')['total'].abs().to_dict()
+        logger.info('Data transformed into dictionary format.', 
+                    extra={'result_dict': result_dict})
         
         return result_dict
     except Exception as e:
-        print(e)
+        logger.error('An error occurred while generating chart data', exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while obtaining the chart data"
@@ -398,8 +457,12 @@ def get_table(table_name: str) -> dict:
     }
     
     act_table_name = name_mapping.get(decoded_name)   
+    logger.info('Request to retrieve table', 
+                extra={'requested_table': decoded_name, 'actual_table': act_table_name})
     try:
         if not table_exists(act_table_name):
+            
+            logger.warning('Table not found', extra={'table_name': act_table_name})
             raise HTTPException(
                 status_code=404,
                 detail=f"Table '{act_table_name}' does not exist in the database."
@@ -413,7 +476,8 @@ def get_table(table_name: str) -> dict:
         return {"data": data}
     
     except Exception as e:
-        print(e)
+        logger.error('An error occurred while obtaining the table', 
+                     exc_info=True, extra={'table_name': act_table_name})
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="An error occurred while obtaining the tables"
