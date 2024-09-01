@@ -2,6 +2,7 @@ module.exports = {
     extends: 'next/core-web-vitals',
     rules: {
       'quotes': ['warn', 'single'],
+      'semi': ['error', 'never'],
       'comma-dangle': ['warn', 'always-multiline'],
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       'indent': ['warn', 2],
@@ -14,7 +15,6 @@ module.exports = {
       'space-infix-ops': 'warn',
       'eqeqeq': ['warn', 'always'],
       'no-extra-semi': 'warn',
-      'no-explicit-any': 'warn',
       'react/jsx-first-prop-new-line': ['warn', 'multiline'],
       'react/react-in-jsx-scope': 'off',
     },

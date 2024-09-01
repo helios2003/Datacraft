@@ -1,6 +1,4 @@
-- handle the prcessng button loader
 - use pydantic
 - fix the deployment with docker
 - pylint
-- push down prop drilling
 - logging

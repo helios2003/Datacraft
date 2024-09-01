@@ -1,11 +1,16 @@
 """
 It helps in initializing the database and creates the session
 """
+import os
 from sqlalchemy import create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from dotenv import load_dotenv
 
-SQLALCHEMY_DATABASE_URL = "postgresql://root:example@localhost:5432/labs_db"
+load_dotenv()
+
+host_name = os.getenv('host_name')
+SQLALCHEMY_DATABASE_URL = f"postgresql://root:example@{host_name}:5432/labs_db"
 
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 Session = sessionmaker(autocommit=False, autoflush=False, bind=engine)

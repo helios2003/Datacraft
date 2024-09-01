@@ -21,5 +21,5 @@ export default function Loading() {
       />
       <p className="mt-4 text-xl text-purple-600">The data is loading</p>
     </div>
-  );
+  )
 }

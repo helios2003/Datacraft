@@ -40,25 +40,26 @@ export default function PieChart({ data }: chartInputProps) {
           boxWidth: 10,
           padding: 10,
           font: {
-            size: 12
-          }
+            size: 12,
+          },
         },
       },
       tooltip: {
         callbacks: {
           label: function (tooltipItem: any) {
-            return `${tooltipItem.label}: ${tooltipItem.raw}`;
-          }
-        }
+            return `${tooltipItem.label}: ${tooltipItem.raw}`
+          },
+        },
       },
     },
     layout: {
       padding: 10,
-    }
+    },
   }
 
   return (
-    <div style={{ width: '100%', height: '300px' }}>
+    <div style={{ width: '100%', height: '270px' }}>
+      <div className="text-xs text-gray-500 font-semibold flex justify-center">Reimbursement Data as Percentage</div>
       <Pie data={chartData} options={options} />
     </div>
   )

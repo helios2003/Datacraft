@@ -18,5 +18,5 @@ export default function Uploadbutton() {
         {hover ? <FaArrowAltCircleRight className="items-center text-slate-100 h-8 w-8"/> : 'Start By Uploading Files'}
       </button>
     </div>
-  );
+  )
 }

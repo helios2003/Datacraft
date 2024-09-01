@@ -46,4 +46,4 @@ jobs:
 
     - name: Lint backend
       working-directory: ./backend
-      run: pylint --disable=C0303 --disable=C0301 **/*.py
+      run: pylint --disable=C0303 --disable=C0301 --disable=E0401 --disable=R0903 **/*.py

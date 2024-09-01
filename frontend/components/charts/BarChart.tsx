@@ -37,7 +37,7 @@ export default function BarChart({ data }: BarChartProps) {
       },
       title: {
         display: true,
-        text: 'Reimbursements bar chart'
+        text: 'Reimbursements comparision',
       },
     },
     scales: {

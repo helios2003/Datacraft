@@ -5,13 +5,13 @@ import { useState } from 'react'
 interface ProcessbuttonProps {
   filesSize: number
   onClick: () => void
-  uploadStatus: boolean
+  uploadStatus: boolean,
 }
 
 export default function Processbutton({ filesSize, onClick, uploadStatus }: ProcessbuttonProps) {
   const [hover, setHover] = useState<boolean>(false)
 
-  const isDisabled = filesSize !== 2;
+  const isDisabled = filesSize !== 2
 
   return (
     <div className="p-16">
@@ -30,5 +30,5 @@ export default function Processbutton({ filesSize, onClick, uploadStatus }: Proc
         {uploadStatus ? 'Start Processing' : 'Start Uploading'}
       </button>
     </div>
-  );
+  )
 }

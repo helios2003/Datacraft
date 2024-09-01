@@ -5,21 +5,30 @@ import { useRouter } from 'next/navigation'
 
 interface CardProps {
   title: string
-  value: string
+  value: number
 }
 
-function CommaSeparation(value: string) {
+function CommaSeparation(value: number) {
+  const stat = value.toString()
+  if (typeof stat !== 'string' || stat.trim() === '') {
+    return stat
+  }
+
   let formattedString = ''
-  let counter = 0;
-  const num = value.split('.')[0];
-  const fraction = value.split('.')[1] === undefined ? '' : value.split('.')[1];
+  let counter = 0
+  const num = stat.split('.')[0]
+  const fraction = stat.split('.')[1] === undefined ? '' : stat.split('.')[1]
 
   if (num.length <= 3) {
-    return num + '.' + fraction
+    if (fraction) {
+      return num + '.' + fraction
+    } else {
+      return num
+    }
   }
 
   for (let i = num.length - 1; i >= 1; i--) {
-    formattedString += num[i];
+    formattedString += num[i]
     if (counter % 3 === 2) {
       formattedString += ','
     }
@@ -38,14 +47,14 @@ function CommaSeparation(value: string) {
 }
 
 export default function Card({ title, value }: CardProps) {
-  const router = useRouter();
-  //const finalValue = CommaSeparation(value);
+  const router = useRouter()
+  const finalValue = CommaSeparation(value)
 
   return (
     <div className="w-72 h-30 grid grid-cols-5 p-2 rounded-lg border border-gray-400">
       <div className="col-span-4 flex flex-col justify-center space-y-2">
         <div className="text-md font-semibold text-purple-500">{title}</div>
-        <div className="font-semibold text-4xl">{value}</div>
+        <div className="font-semibold text-4xl">{finalValue}</div>
       </div>
       <div className="flex items-center justify-center">
         <MdNavigateNext
@@ -56,5 +65,5 @@ export default function Card({ title, value }: CardProps) {
         />
       </div>
     </div>
-  );
+  )
 }

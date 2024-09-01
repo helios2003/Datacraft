@@ -1,9 +1,9 @@
 'use client'
 
-import { FaGithub } from "react-icons/fa"
-import { IoMdMail } from "react-icons/io"
-import { FaPhoneAlt } from "react-icons/fa"
-import { useRouter } from "next/navigation"
+import { FaGithub } from 'react-icons/fa'
+import { IoMdMail } from 'react-icons/io'
+import { FaPhoneAlt } from 'react-icons/fa'
+import { useRouter } from 'next/navigation'
 
 export default function Navbar() {
   const router = useRouter()
@@ -13,7 +13,7 @@ export default function Navbar() {
       <div
         className="text-3xl pl-6 font-semibold cursor-pointer"
         onClick={() => {
-          router.push("/")
+          router.push('/')
         }}
       >
         Datacraft
