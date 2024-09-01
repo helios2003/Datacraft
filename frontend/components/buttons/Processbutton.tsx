@@ -5,7 +5,7 @@ import { useState } from 'react'
 interface ProcessbuttonProps {
   filesSize: number
   onClick: () => void
-  uploadStatus: boolean
+  uploadStatus: boolean,
 }
 
 export default function Processbutton({ filesSize, onClick, uploadStatus }: ProcessbuttonProps) {
