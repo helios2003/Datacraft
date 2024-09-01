@@ -53,7 +53,8 @@ Follow the given steps:
 "MaintenanceDB": "postgres"
 ```
 ## Demo Video
-[![Video](file:assets/demo.mp4)
+<video src="assets/demo.mp4" width="640" height="280" controls></video>
+
 ## Tasks Completed
 ### Data Processing
 - [x] Created the Merged Sheet.
