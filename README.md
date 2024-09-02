@@ -53,7 +53,7 @@ Follow the given steps:
 "MaintenanceDB": "postgres"
 ```
 ## Demo Video
-<video src="assets/demo.mp4" width="640" height="280" controls></video>
+https://github.com/user-attachments/assets/8c3220e7-4519-4a2c-86d3-9ef52c4ce09a
 
 ## Tasks Completed
 ### Data Processing
@@ -69,6 +69,7 @@ Follow the given steps:
 ### Backend
 - [x] Created endpoints for processing the uplaoding the dataset to database.
 - [x] Designed functions for all the ELT processes.
+- [x] Added logging to the backend routes in JSON format. 
 
 ### Deployment
 - [x] Containerized the frontend, backend and the database.
@@ -84,8 +85,8 @@ Follow the given steps:
 ```mermaid
 flowchart TD
     A[User] -->|/upload| B[Uploads Files]
-    B --> C{Processing the tables}
-    C --> D[Stores it in the database]
+    B --> C{Processing the files}
+    C --> D[Stores it in the database in the form of tables]
     D --> |/dashboard| E[Dashboard: View Statistics]
     E -->|/table_name=name| F[View the table]
     classDef darkNode fill:#333,stroke:#fff,stroke-width:2px,color:#fff;
@@ -199,6 +200,3 @@ classDiagram
 - FastAPI in the backend + Pandas for the data preprocessing.
 - NextJS in the frontend.
 - PostgreSQL as the database.
-  
-
-  
